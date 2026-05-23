@@ -24,5 +24,6 @@ dist-ssr
 *.sln
 *.sw?
 
-# Local product spec (not for version control)
+# Local product spec and planning docs (not for version control)
 PRODUCT.txt
+plan/

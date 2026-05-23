@@ -2,7 +2,9 @@
 
 Phased plan for building Hostile Web Cleaner, mapped from the local `PRODUCT.txt` spec (gitignored).
 
-## Phase 0 — Scaffold (current)
+Detailed task breakdowns, file lists, and verification steps live in the local `plan/` folder (also gitignored — not pushed to GitHub).
+
+## Phase 0 — Scaffold (complete)
 
 **Goal:** Project structure, build tooling, and extension shell.
 
@@ -25,7 +27,8 @@ Phased plan for building Hostile Web Cleaner, mapped from the local `PRODUCT.txt
 
 **Modules:**
 - `src/content/patches/window-open.ts` — intercept `window.open`
-- `src/background/index.ts` — detect and auto-close spam tabs
+- `src/content/patches/user-gesture.ts` — track trusted user gestures
+- `src/background/tab-guard.ts` — detect and auto-close spam tabs
 
 **Expected result:** Normal click behavior without popup spam.
 
@@ -42,6 +45,20 @@ Phased plan for building Hostile Web Cleaner, mapped from the local `PRODUCT.txt
 - `src/content/repair/scroll-restore.ts` — re-enable scrolling and pointer events
 
 **Expected result:** Users regain access to page content instantly.
+
+---
+
+## Phase 2.5 — Fake Download Button Detection
+
+**Goal:** Safer downloading on hostile file-host and software sites.
+
+**Problem:** Ads disguised as download buttons redirect to malware or affiliate pages (PRODUCT Goal 4).
+
+**Modules:**
+- `src/content/repair/download-button-analyzer.ts` — score suspicious download CTAs
+- `src/content/repair/download-button-highlighter.ts` — flag trusted vs fake buttons
+
+**Expected result:** Only legitimate download actions remain clickable.
 
 ---
 
@@ -68,6 +85,7 @@ Phased plan for building Hostile Web Cleaner, mapped from the local `PRODUCT.txt
 **Modules:**
 - `src/background/redirect-tracker.ts` — monitor navigation chains
 - `src/background/redirect-classifier.ts` — classify suspicious redirects
+- `src/content/patches/location-assign.ts` — block high-risk programmatic redirects
 
 **Expected result:** Users stay on intended destinations; harmful tabs auto-close.
 
@@ -82,7 +100,8 @@ Phased plan for building Hostile Web Cleaner, mapped from the local `PRODUCT.txt
 **Modules:**
 - `src/rules/defaults.json` — curated default rules
 - `src/rules/engine.ts` — hostname matching and rule resolution
-- Popup UI — per-site rule overrides (future)
+- `src/core/storage/site-overrides.ts` — user per-domain overrides
+- Popup UI — per-site rule visibility and toggles
 
 **Example rule:**
 ```json
@@ -102,12 +121,19 @@ Phased plan for building Hostile Web Cleaner, mapped from the local `PRODUCT.txt
 **Problem:** Sites detect blockers and break usability.
 
 **Modules:**
-- `src/content/injected/main-world.ts` — spoof ad visibility signals
-- `src/content/patches/adblock-detection.ts` — bypass simplistic detection
+- `src/content/patches/adblock-detection.ts` — neutralize common probes
+- `src/content/patches/bait-elements.ts` — pass bait element checks
+- `src/content/repair/anti-adblock-coordinator.ts` — coordinate with overlay remover
 
 **Expected result:** Sites work normally without user intervention.
 
 ---
+
+## Execution order
+
+```
+Phase 0 ✓ → Phase 1 → Phase 2 → Phase 2.5 → Phase 3 → Phase 4 → Phase 5 → Phase 6
+```
 
 ## Future Possibilities
 
