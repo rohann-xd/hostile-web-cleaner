@@ -27,3 +27,6 @@ dist-ssr
 # Local product spec and planning docs (not for version control)
 PRODUCT.txt
 plan/
+
+# Local dev test pages (served at /dev/ during npm run dev only)
+dev/

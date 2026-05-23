@@ -5,7 +5,20 @@ export * from './types'
 export function sendMessage<T extends ExtensionResponse>(
   message: ExtensionMessage,
 ): Promise<T> {
-  return chrome.runtime.sendMessage(message) as Promise<T>
+  return new Promise((resolve, reject) => {
+    try {
+      chrome.runtime.sendMessage(message, (response) => {
+        const err = chrome.runtime.lastError
+        if (err) {
+          reject(new Error(err.message))
+          return
+        }
+        resolve(response as T)
+      })
+    } catch (error) {
+      reject(error)
+    }
+  })
 }
 
 export function onMessage(
@@ -18,7 +31,12 @@ export function onMessage(
     const result = handler(message as ExtensionMessage, sender)
 
     if (result instanceof Promise) {
-      result.then(sendResponse)
+      result
+        .then(sendResponse)
+        .catch((err) => {
+          console.error('[HostileWebCleaner] Message handler error', err)
+          sendResponse({ success: false })
+        })
       return true
     }
 

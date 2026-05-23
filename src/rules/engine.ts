@@ -16,3 +16,11 @@ export function getRulesForHostname(hostname: string): RuleAction[] {
 export function hasRule(hostname: string, action: RuleAction): boolean {
   return getRulesForHostname(hostname).includes(action)
 }
+
+export function shouldApplyRule(hostname: string, action: RuleAction): boolean {
+  const rules = getRulesForHostname(hostname)
+  if (rules.length > 0) return rules.includes(action)
+  // Until Phase 5: blockPopup enabled globally when no site rule exists
+  if (action === 'blockPopup') return true
+  return false
+}

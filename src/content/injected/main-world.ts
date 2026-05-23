@@ -1,15 +1,8 @@
-/**
- * Runs in the page's main world to patch browser APIs before page scripts execute.
- * Stub only — actual patching logic comes in Phase 1+.
- */
-const LOG_PREFIX = '[HostileWebCleaner:MainWorld]'
+import { trackUserGestures } from '@/content/patches/user-gesture'
+import { patchWindowOpenSync } from '@/content/patches/window-open'
+import { bootstrapProtectionSettings, initProtectionSettingsSync } from '@/content/patches'
 
-function stubPatch(name: string): void {
-  console.debug(LOG_PREFIX, `${name} patch ready (stub)`)
-}
-
-stubPatch('window.open')
-stubPatch('setTimeout')
-stubPatch('location.assign')
-
-console.debug(LOG_PREFIX, 'Main-world script loaded')
+trackUserGestures()
+patchWindowOpenSync()
+void bootstrapProtectionSettings()
+initProtectionSettingsSync()

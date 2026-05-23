@@ -1,11 +1,11 @@
 {
   "name": "hostile-web-cleaner",
   "type": "module",
-  "version": "0.1.0",
+  "version": "0.2.3",
   "private": true,
   "description": "Repair hostile, manipulative website behaviors",
   "scripts": {
-    "dev": "vite",
+    "dev": "node scripts/setup-dev-pages.mjs && vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "typecheck": "tsc -b --noEmit",
@@ -16,7 +16,8 @@
   },
   "dependencies": {
     "react": "^19.2.4",
-    "react-dom": "^19.2.4"
+    "react-dom": "^19.2.4",
+    "tldts": "^7.0.30"
   },
   "devDependencies": {
     "@crxjs/vite-plugin": "^2.4.0",

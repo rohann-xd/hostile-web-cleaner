@@ -19,18 +19,20 @@ Detailed task breakdowns, file lists, and verification steps live in the local `
 
 ---
 
-## Phase 1 — Click Hijacking Prevention
+## Phase 1 — Click Hijacking Prevention (complete)
 
-**Goal:** Users click once and only intended navigation happens.
+**Goal:** Users choose whether a new tab opens; hostile popups and popunders are blocked by default.
 
-**Problem:** Multiple unwanted tabs open from a single click.
+**Delivered:**
+- Toast prompt (Open tab / Block / Block domain for session) via Shadow DOM UI
+- `window.open` patch (MAIN world) + link/form interceptors (isolated)
+- Background popup guard for stashed-native / popunder bypass (`onCreatedNavigationTarget`)
+- Session domain blocklist (`chrome.storage.session`, cleared when browser restarts)
+- Debug logging + export from extension popup
 
-**Modules:**
-- `src/content/patches/window-open.ts` — intercept `window.open`
-- `src/content/patches/user-gesture.ts` — track trusted user gestures
-- `src/background/tab-guard.ts` — detect and auto-close spam tabs
+**Key modules:** `window-open.ts`, `user-gesture.ts`, `link-clicks.ts`, `form-submits.ts`, `popup-guard.ts`, `popup-prompt.ts`, `session-blocklist.ts`
 
-**Expected result:** Normal click behavior without popup spam.
+**Dev tests:** `npm run dev` → http://localhost:5173/dev/phase1-popup-spam.html
 
 ---
 

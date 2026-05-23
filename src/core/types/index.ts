@@ -6,8 +6,10 @@ export type ProtectionModule =
 
 export interface ExtensionSettings {
   enabled: boolean
+  debug: boolean
 }
 
 export const DEFAULT_SETTINGS: ExtensionSettings = {
   enabled: true,
+  debug: false,
 }
