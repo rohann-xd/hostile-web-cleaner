@@ -1,5 +1,6 @@
 import { MessageType } from '@/core/messaging'
 import { getSettings } from '@/core/storage/settings'
+import { shouldCaptureLogs } from '@/core/dev/env'
 import { isDomainBlockedForSession } from '@/core/storage/session-blocklist'
 import { shouldApplyRule } from '@/rules/engine'
 import { pushDebugEntry } from './debug-store'
@@ -47,7 +48,7 @@ async function handleNavigationTarget(details: NavigationTargetDetails): Promise
 
   const matched = consumeExpectedOpen(sourceTabId, url)
 
-  if ((await getSettings()).debug) {
+  if (shouldCaptureLogs((await getSettings()).debug)) {
     await refreshDebugEnabled()
     pushDebugEntry({
       level: 'info',
@@ -75,7 +76,7 @@ async function handleNavigationTarget(details: NavigationTargetDetails): Promise
       // Tab may already be gone
     }
 
-    if ((await getSettings()).debug) {
+    if (shouldCaptureLogs((await getSettings()).debug)) {
       pushDebugEntry({
         level: 'info',
         scope: 'PopupGuard',

@@ -36,17 +36,23 @@ Detailed task breakdowns, file lists, and verification steps live in the local `
 
 ---
 
-## Phase 2 — Fake Overlay Removal
+## Phase 2 — Fake Overlay Removal (complete)
 
 **Goal:** Restore access to page content blocked by fullscreen overlays.
 
 **Problem:** "Disable Adblocker" overlays, fake virus alerts, forced subscription prompts.
 
-**Modules:**
-- `src/content/repair/overlay-remover.ts` — detect and remove blocking elements
-- `src/content/repair/scroll-restore.ts` — re-enable scrolling and pointer events
+**Delivered:**
+- Heuristic overlay detection and removal (`overlay-remover.ts`, scoring ≥ 60)
+- Allowlist for legitimate modals, video players, cookie consent (`overlay-allowlist.ts`)
+- Scroll and pointer restoration (`scroll-restore.ts`)
+- MutationObserver with debounced re-repair and 30s timeout
+- Session overlay removal counter via messaging
+- Global `removeOverlay` / `restoreScroll` rules (until Phase 5)
 
-**Expected result:** Users regain access to page content instantly.
+**Key modules:** `overlay-remover.ts`, `overlay-allowlist.ts`, `scroll-restore.ts`, `dom-observer.ts`, `repair/index.ts`
+
+**Dev tests:** `npm run dev` → http://localhost:5173/dev/phase2-overlays.html
 
 ---
 
@@ -134,7 +140,7 @@ Detailed task breakdowns, file lists, and verification steps live in the local `
 ## Execution order
 
 ```
-Phase 0 ✓ → Phase 1 → Phase 2 → Phase 2.5 → Phase 3 → Phase 4 → Phase 5 → Phase 6
+Phase 0 ✓ → Phase 1 ✓ → Phase 2 ✓ → Phase 2.5 → Phase 3 → Phase 4 → Phase 5 → Phase 6
 ```
 
 ## Future Possibilities

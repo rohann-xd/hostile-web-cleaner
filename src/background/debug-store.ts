@@ -1,4 +1,5 @@
 import type { DebugLevel, DebugLogEntry } from '@/core/debug/types'
+import { formatDevReport } from '@/core/dev/report'
 
 const MAX_ENTRIES = 400
 const STORAGE_KEY = 'hwcDebugLogs'
@@ -69,22 +70,7 @@ export function clearDebugEntries(): void {
 }
 
 export function formatLogsForExport(entries: DebugLogEntry[]): string {
-  const header = [
-    'Hostile Web Cleaner — debug log export',
-    `Exported: ${new Date().toISOString()}`,
-    `Entries: ${entries.length}`,
-    '---',
-  ].join('\n')
-
-  const lines = entries.map((e) => {
-    const time = new Date(e.ts).toISOString()
-    const data = e.data ? ` ${JSON.stringify(e.data)}` : ''
-    const page = e.url ? ` page=${e.url}` : ''
-    const tab = e.tabId != null ? ` tabId=${e.tabId}` : ''
-    return `${time} [${e.level}] ${e.scope}:${e.event}${data}${page}${tab}`
-  })
-
-  return `${header}\n${lines.join('\n')}\n`
+  return formatDevReport(entries)
 }
 
 export function logLevelForUntracked(): DebugLevel {

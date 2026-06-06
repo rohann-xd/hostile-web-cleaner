@@ -23,6 +23,10 @@ import { notifyPopupBlocked } from '@/content/notify-popup-blocked'
 const ROOT_ID = 'hwc-popup-prompt-root'
 const EXTENSION_NAME = 'Hostile Web Cleaner'
 
+/** Keep toast above page overlays (Phase 2+ may leave fixed backdrops below max z-index). */
+const HOST_STYLES =
+  'position:fixed;inset:0;width:100%;height:0;overflow:visible;z-index:2147483647;pointer-events:none;margin:0;padding:0;border:0;background:transparent;'
+
 const STYLES = `
   :host { all: initial; }
   .hwc-toast-stack {
@@ -310,10 +314,11 @@ function showToast(shadow: ShadowRoot, detail: PopupRequestDetail): void {
 }
 
 export function initPopupPrompt(): void {
-  if (document.getElementById(ROOT_ID)) return
+  document.getElementById(ROOT_ID)?.remove()
 
   const host = document.createElement('div')
   host.id = ROOT_ID
+  host.style.cssText = HOST_STYLES
   const shadow = host.attachShadow({ mode: 'closed' })
 
   const style = document.createElement('style')

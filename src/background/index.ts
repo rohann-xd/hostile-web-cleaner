@@ -1,3 +1,4 @@
+import { isDevBuild, shouldCaptureLogs } from '@/core/dev/env'
 import {
   MessageType,
   onMessage,
@@ -10,6 +11,7 @@ import {
   getSessionBlockedDomains,
 } from '@/core/storage/session-blocklist'
 import { getSettings, setSettings } from '@/core/storage/settings'
+import { incrementSessionOverlayCount } from '@/core/storage/overlay-stats'
 import { pushDebugEntry } from './debug-store'
 import {
   clearDebugEntries,
@@ -39,7 +41,8 @@ chrome.webNavigation.onCommitted.addListener((details) => {
   }
 
   void (async () => {
-    if (!(await getSettings()).debug) return
+    const settings = await getSettings()
+    if (!shouldCaptureLogs(settings.debug)) return
     pushDebugEntry({
       level: 'debug',
       scope: 'Navigation',
@@ -82,7 +85,7 @@ onMessage(async (message: ExtensionMessage, sender): Promise<ExtensionResponse> 
 
     case MessageType.DEBUG_LOG: {
       const settings = await getSettings()
-      if (!settings.debug) return { success: true }
+      if (!shouldCaptureLogs(settings.debug)) return { success: true }
 
       pushDebugEntry({
         level: message.payload.level ?? 'debug',
@@ -125,7 +128,7 @@ onMessage(async (message: ExtensionMessage, sender): Promise<ExtensionResponse> 
 
     case MessageType.POPUP_ALLOWED: {
       const settings = await getSettings()
-      if (settings.debug) {
+      if (shouldCaptureLogs(settings.debug)) {
         pushDebugEntry({
           level: 'info',
           scope: 'Background',
@@ -144,7 +147,7 @@ onMessage(async (message: ExtensionMessage, sender): Promise<ExtensionResponse> 
 
     case MessageType.POPUP_BLOCKED: {
       const settings = await getSettings()
-      if (settings.debug) {
+      if (shouldCaptureLogs(settings.debug)) {
         pushDebugEntry({
           level: 'info',
           scope: 'Background',
@@ -182,7 +185,7 @@ onMessage(async (message: ExtensionMessage, sender): Promise<ExtensionResponse> 
 
       try {
         const tab = await chrome.tabs.create(tabOptions)
-        if ((await getSettings()).debug) {
+        if (shouldCaptureLogs((await getSettings()).debug)) {
           pushDebugEntry({
             level: 'info',
             scope: 'Background',
@@ -206,9 +209,30 @@ onMessage(async (message: ExtensionMessage, sender): Promise<ExtensionResponse> 
       }
     }
 
+    case MessageType.OVERLAY_REMOVED: {
+      const total = await incrementSessionOverlayCount(message.payload.count)
+      const settings = await getSettings()
+      if (shouldCaptureLogs(settings.debug)) {
+        pushDebugEntry({
+          level: 'info',
+          scope: 'Background',
+          event: 'overlay_removed',
+          data: {
+            tabId: sender.tab?.id,
+            count: message.payload.count,
+            sessionTotal: total,
+            url: message.payload.url,
+          },
+          tabId: sender.tab?.id,
+          url: message.payload.url,
+        })
+      }
+      return { success: true }
+    }
+
     default:
       return { success: true }
   }
 })
 
-console.debug(LOG_PREFIX, 'Service worker started')
+console.debug(LOG_PREFIX, 'Service worker started', isDevBuild() ? '(dev logging on)' : '')

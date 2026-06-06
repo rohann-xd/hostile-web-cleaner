@@ -51,7 +51,7 @@ const pages = {
     <p>Run <code>npm run dev</code>, load the extension from <code>dist/</code>, then open these URLs.</p>
     <ul>
       <li><a href="/dev/phase1-popup-spam.html">Phase 1 — Popup confirmation toasts</a></li>
-      <li><a href="/dev/phase2-overlays.html">Phase 2 — Fake overlays</a> <span class="tag soon">coming soon</span></li>
+      <li><a href="/dev/phase2-overlays.html">Phase 2 — Fake overlays</a></li>
       <li><a href="/dev/phase2b-downloads.html">Phase 2.5 — Fake download buttons</a> <span class="tag soon">coming soon</span></li>
       <li><a href="/dev/phase3-countdown.html">Phase 3 — Countdown bypass</a> <span class="tag soon">coming soon</span></li>
     </ul>
@@ -116,14 +116,90 @@ const pages = {
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Phase 2 — Overlays (placeholder)</title>
-    <style>${sharedStyles}</style>
+    <title>Phase 2 — Overlays</title>
+    <style>${sharedStyles}
+      .scroll-content { min-height: 200vh; padding-bottom: 4rem; }
+      .hostile-overlay {
+        position: fixed;
+        inset: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 99999;
+        background: rgba(0, 0, 0, 0.85);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 2rem;
+        box-sizing: border-box;
+      }
+      .hostile-overlay h2 { font-size: 1.5rem; margin-bottom: 1rem; }
+      .legit-modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .legit-modal {
+        background: #fff;
+        border-radius: 8px;
+        padding: 1.5rem;
+        max-width: 400px;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+      }
+      .note { background: #fef3c7; padding: 0.75rem; border-radius: 6px; font-size: 0.9rem; }
+    </style>
   </head>
   <body>
-    <p class="tag soon">Phase 2 — not implemented yet</p>
+    <p class="tag">Phase 2</p>
     <h1>Fake overlay test</h1>
-    <p>Placeholder for fullscreen anti-adblock overlay + scroll lock scenarios.</p>
+    <p>With the extension enabled, hostile overlays should be removed within ~1s and the page should scroll. Legitimate modals must survive.</p>
     <p><a href="/dev/">← All phase tests</a></p>
+
+    <div class="note">
+      <strong>Extension off test:</strong> Disable the extension in the popup, reload — the hostile overlay below should remain and scroll should stay locked.
+    </div>
+
+    <h2>Scrollable content underneath</h2>
+    <div class="scroll-content">
+      <p>This paragraph is below a hostile overlay. If repair works, you can scroll to read this and click the link below.</p>
+      <p><a href="https://example.com/under-overlay">Test link under overlay</a></p>
+      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Keep scrolling to verify body scroll was restored.</p>
+      <p>More content at the bottom of the page to confirm scrolling works after overlay removal.</p>
+    </div>
+
+    <div id="hostile-overlay" class="hostile-overlay">
+      <div>
+        <h2>Please disable your ad blocker</h2>
+        <p>This site requires ads to stay free. Whitelist this site to continue.</p>
+      </div>
+    </div>
+
+    <div class="legit-modal-backdrop">
+      <div class="legit-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <h2 id="modal-title">Legitimate modal</h2>
+        <p>This dialog should <strong>not</strong> be removed — it has role="dialog" and aria-modal="true".</p>
+        <button type="button" onclick="this.closest('.legit-modal-backdrop').style.display='none'">Close</button>
+      </div>
+    </div>
+
+    <script>
+      document.body.style.overflow = 'hidden';
+
+      setTimeout(function () {
+        if (document.getElementById('delayed-overlay')) return;
+        var el = document.createElement('div');
+        el.id = 'delayed-overlay';
+        el.className = 'hostile-overlay';
+        el.style.zIndex = '999999';
+        el.innerHTML = '<div><h2>Ad blocker detected</h2><p>Delayed overlay — injected after 2s. Should be removed by observer.</p></div>';
+        document.body.appendChild(el);
+      }, 2000);
+    </script>
   </body>
 </html>`,
 

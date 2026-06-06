@@ -1,4 +1,5 @@
 import { getSettings } from '@/core/storage/settings'
+import { shouldCaptureLogs } from '@/core/dev/env'
 import { MessageType, sendMessage } from '@/core/messaging'
 import type { DebugLevel, DebugLogPayload } from './types'
 
@@ -13,7 +14,8 @@ export function captureStack(maxLines = 6): string | undefined {
 }
 
 export async function isDebugEnabled(): Promise<boolean> {
-  return (await getSettings()).debug
+  const settings = await getSettings()
+  return shouldCaptureLogs(settings.debug)
 }
 
 /**
@@ -26,7 +28,7 @@ export async function hwcDebug(
   options?: { level?: DebugLevel; url?: string },
 ): Promise<void> {
   const settings = await getSettings()
-  if (!settings.debug) return
+  if (!shouldCaptureLogs(settings.debug)) return
 
   const level = options?.level ?? 'debug'
   const pageUrl =

@@ -1,4 +1,5 @@
 import { getSettings } from '@/core/storage/settings'
+import { shouldCaptureLogs } from '@/core/dev/env'
 import {
   clearDebugEntries,
   formatLogsForExport,
@@ -31,7 +32,7 @@ export async function initTabWatch(): Promise<void> {
 }
 
 export async function refreshDebugEnabled(): Promise<void> {
-  debugEnabled = (await getSettings()).debug
+  debugEnabled = shouldCaptureLogs((await getSettings()).debug)
 }
 
 function prunePending(): void {

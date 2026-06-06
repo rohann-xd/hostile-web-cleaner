@@ -9,6 +9,8 @@ import {
 } from '@/core/messaging'
 import './index.css'
 
+const isDevBuild = import.meta.env.DEV
+
 export default function App() {
   const [enabled, setEnabled] = useState(true)
   const [debug, setDebug] = useState(false)
@@ -35,7 +37,7 @@ export default function App() {
         setHostname(tabRes.hostname)
         setBlockedDomains(blocksRes.domains)
 
-        if (settingsRes.settings.debug) {
+        if (isDevBuild || settingsRes.settings.debug) {
           const logsRes = await sendMessage<DebugLogsResponse>({
             type: MessageType.GET_DEBUG_LOGS,
           })
@@ -160,6 +162,28 @@ export default function App() {
       </section>
 
       <section className="debug-section">
+        {isDevBuild && (
+          <>
+            <p className="session-label">Dev logger (npm run dev)</p>
+            <p className="debug-hint">
+              Run Phase 1 + 2 tests, then copy the report below. On a test page you can also
+              run <code>__HWC__.copyReport()</code> in the console.
+            </p>
+            <div className="debug-actions">
+              <button type="button" className="btn-secondary" onClick={handleCopyLogs}>
+                Copy dev report
+              </button>
+              <button type="button" className="btn-ghost" onClick={handleClearLogs}>
+                Clear
+              </button>
+            </div>
+            <p className="debug-meta">
+              {logCount} log {logCount === 1 ? 'entry' : 'entries'}
+              {copyStatus ? ` · ${copyStatus}` : ''}
+            </p>
+          </>
+        )}
+
         <label className="toggle-label">
           <span>Debug mode</span>
           <button
@@ -172,7 +196,7 @@ export default function App() {
             <span className="toggle-knob" />
           </button>
         </label>
-        {debug && (
+        {debug && !isDevBuild && (
           <>
             <p className="debug-hint">
               Reload the problem page after enabling. Reproduce the leak, then copy logs

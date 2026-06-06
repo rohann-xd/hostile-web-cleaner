@@ -1,3 +1,5 @@
+import { isDevBuild } from '@/core/dev/env'
+import { hwcDebug } from '@/core/debug/logger'
 import { isEnabled } from '@/core/storage/settings'
 import { getRulesForHostname, shouldApplyRule } from '@/rules/engine'
 import { setPopupProtectionEnabled } from '@/content/popup-bridge'
@@ -7,14 +9,18 @@ import { initLinkClickInterceptor } from './interceptors/link-clicks'
 import { isDebugEnabled } from '@/core/logging'
 import { getSessionBlockedDomains } from '@/core/storage/session-blocklist'
 import { startDomObserver } from './observers/dom-observer'
-import { initRepair } from './repair'
+import { initRepair, runRepair } from './repair'
 import { initUntrackedTabHandler } from './untracked-tab'
 import { initPopupPrompt } from './ui/popup-prompt'
+import { initDevGlobalApi } from './dev/global-api'
 
 const LOG_PREFIX = '[HostileWebCleaner]'
 
 initPopupPrompt()
 initUntrackedTabHandler()
+if (isDevBuild()) {
+  initDevGlobalApi()
+}
 void getSessionBlockedDomains()
 
 async function bootstrap(): Promise<void> {
@@ -22,6 +28,8 @@ async function bootstrap(): Promise<void> {
   const hostname = window.location.hostname
   const rules = getRulesForHostname(hostname)
   const blockPopup = enabled && shouldApplyRule(hostname, 'blockPopup')
+  const removeOverlay = enabled && shouldApplyRule(hostname, 'removeOverlay')
+  const restoreScroll = enabled && shouldApplyRule(hostname, 'restoreScroll')
 
   setPopupProtectionEnabled(blockPopup)
 
@@ -30,7 +38,13 @@ async function bootstrap(): Promise<void> {
     return
   }
 
-  console.debug(LOG_PREFIX, 'Content script active', { hostname, rules, blockPopup })
+  console.debug(LOG_PREFIX, 'Content script active', {
+    hostname,
+    rules,
+    blockPopup,
+    removeOverlay,
+    restoreScroll,
+  })
 
   if (blockPopup) {
     initLinkClickInterceptor()
@@ -41,8 +55,20 @@ async function bootstrap(): Promise<void> {
     initDebugClickAudit()
   }
 
-  startDomObserver()
-  initRepair()
+  if (removeOverlay || restoreScroll) {
+    if (window === window.top) {
+      initRepair({ removeOverlay, restoreScroll })
+      startDomObserver(() => runRepair())
+    }
+  }
+
+  void hwcDebug('Bootstrap', 'content_script_active', {
+    blockPopup,
+    removeOverlay,
+    restoreScroll,
+    devBuild: isDevBuild(),
+    frame: window === window.top ? 'top' : 'subframe',
+  })
 }
 
 chrome.storage.onChanged.addListener((changes, area) => {

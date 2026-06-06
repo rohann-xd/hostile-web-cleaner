@@ -20,7 +20,9 @@ export function hasRule(hostname: string, action: RuleAction): boolean {
 export function shouldApplyRule(hostname: string, action: RuleAction): boolean {
   const rules = getRulesForHostname(hostname)
   if (rules.length > 0) return rules.includes(action)
-  // Until Phase 5: blockPopup enabled globally when no site rule exists
+  // Until Phase 5: core repair actions enabled globally when no site rule exists
   if (action === 'blockPopup') return true
+  if (action === 'removeOverlay') return true
+  if (action === 'restoreScroll') return true
   return false
 }

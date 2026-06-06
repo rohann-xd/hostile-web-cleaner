@@ -17,6 +17,7 @@ export enum MessageType {
   GET_SESSION_BLOCKS = 'GET_SESSION_BLOCKS',
   BLOCK_DOMAIN_SESSION = 'BLOCK_DOMAIN_SESSION',
   UNTRACKED_TAB_PROMPT = 'UNTRACKED_TAB_PROMPT',
+  OVERLAY_REMOVED = 'OVERLAY_REMOVED',
 }
 
 export interface GetSettingsResponse {
@@ -46,6 +47,11 @@ export interface OpenTabPayload {
 }
 
 export interface UntrackedTabPromptPayload {
+  url: string
+}
+
+export interface OverlayRemovedPayload {
+  count: number
   url: string
 }
 
@@ -87,6 +93,7 @@ export type ExtensionMessage =
   | { type: MessageType.GET_SESSION_BLOCKS }
   | { type: MessageType.BLOCK_DOMAIN_SESSION; payload: BlockDomainSessionPayload }
   | { type: MessageType.UNTRACKED_TAB_PROMPT; payload: UntrackedTabPromptPayload }
+  | { type: MessageType.OVERLAY_REMOVED; payload: OverlayRemovedPayload }
 
 export type ExtensionResponse =
   | GetSettingsResponse
