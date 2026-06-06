@@ -63,6 +63,10 @@ function onSubmit(event: SubmitEvent): void {
   void handleFormSubmit(form, event)
 }
 
+let initialized = false
+
 export function initFormSubmitInterceptor(): void {
+  if (initialized) return
+  initialized = true
   document.addEventListener('submit', onSubmit, true)
 }

@@ -12,6 +12,7 @@ import {
 } from '@/core/storage/session-blocklist'
 import { getSettings, setSettings } from '@/core/storage/settings'
 import { incrementSessionOverlayCount } from '@/core/storage/overlay-stats'
+import { incrementSessionFakeDownloadCount } from '@/core/storage/download-stats'
 import { pushDebugEntry } from './debug-store'
 import {
   clearDebugEntries,
@@ -217,6 +218,27 @@ onMessage(async (message: ExtensionMessage, sender): Promise<ExtensionResponse> 
           level: 'info',
           scope: 'Background',
           event: 'overlay_removed',
+          data: {
+            tabId: sender.tab?.id,
+            count: message.payload.count,
+            sessionTotal: total,
+            url: message.payload.url,
+          },
+          tabId: sender.tab?.id,
+          url: message.payload.url,
+        })
+      }
+      return { success: true }
+    }
+
+    case MessageType.FAKE_DOWNLOAD_FLAGGED: {
+      const total = await incrementSessionFakeDownloadCount(message.payload.count)
+      const settings = await getSettings()
+      if (shouldCaptureLogs(settings.debug)) {
+        pushDebugEntry({
+          level: 'info',
+          scope: 'Background',
+          event: 'fake_download_flagged',
           data: {
             tabId: sender.tab?.id,
             count: message.payload.count,

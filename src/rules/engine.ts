@@ -23,6 +23,7 @@ export function shouldApplyRule(hostname: string, action: RuleAction): boolean {
   // Until Phase 5: core repair actions enabled globally when no site rule exists
   if (action === 'blockPopup') return true
   if (action === 'removeOverlay') return true
+  if (action === 'flagFakeDownloads') return true
   if (action === 'restoreScroll') return true
   return false
 }

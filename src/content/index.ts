@@ -9,7 +9,13 @@ import { initLinkClickInterceptor } from './interceptors/link-clicks'
 import { isDebugEnabled } from '@/core/logging'
 import { getSessionBlockedDomains } from '@/core/storage/session-blocklist'
 import { startDomObserver } from './observers/dom-observer'
-import { initRepair, runRepair } from './repair'
+import {
+  initRepair,
+  isDownloadScanEnabled,
+  isRepairEnabled,
+  refreshRepairOnPage,
+  runRepair,
+} from './repair'
 import { initUntrackedTabHandler } from './untracked-tab'
 import { initPopupPrompt } from './ui/popup-prompt'
 import { initDevGlobalApi } from './dev/global-api'
@@ -23,6 +29,10 @@ if (isDevBuild()) {
 }
 void getSessionBlockedDomains()
 
+function startRepairObserver(extendForDownloads: boolean): void {
+  startDomObserver(() => runRepair(), { extendForDownloads })
+}
+
 async function bootstrap(): Promise<void> {
   const enabled = await isEnabled()
   const hostname = window.location.hostname
@@ -30,6 +40,7 @@ async function bootstrap(): Promise<void> {
   const blockPopup = enabled && shouldApplyRule(hostname, 'blockPopup')
   const removeOverlay = enabled && shouldApplyRule(hostname, 'removeOverlay')
   const restoreScroll = enabled && shouldApplyRule(hostname, 'restoreScroll')
+  const flagFakeDownloads = enabled && shouldApplyRule(hostname, 'flagFakeDownloads')
 
   setPopupProtectionEnabled(blockPopup)
 
@@ -44,6 +55,7 @@ async function bootstrap(): Promise<void> {
     blockPopup,
     removeOverlay,
     restoreScroll,
+    flagFakeDownloads,
   })
 
   if (blockPopup) {
@@ -55,10 +67,10 @@ async function bootstrap(): Promise<void> {
     initDebugClickAudit()
   }
 
-  if (removeOverlay || restoreScroll) {
+  if (removeOverlay || restoreScroll || flagFakeDownloads) {
     if (window === window.top) {
-      initRepair({ removeOverlay, restoreScroll })
-      startDomObserver(() => runRepair())
+      initRepair({ removeOverlay, restoreScroll, flagFakeDownloads })
+      startRepairObserver(flagFakeDownloads)
     }
   }
 
@@ -66,6 +78,7 @@ async function bootstrap(): Promise<void> {
     blockPopup,
     removeOverlay,
     restoreScroll,
+    flagFakeDownloads,
     devBuild: isDevBuild(),
     frame: window === window.top ? 'top' : 'subframe',
   })
@@ -74,6 +87,13 @@ async function bootstrap(): Promise<void> {
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area !== 'sync' || !changes.settings) return
   void bootstrap()
+})
+
+window.addEventListener('pageshow', () => {
+  if (window !== window.top) return
+  if (!isRepairEnabled()) return
+  refreshRepairOnPage()
+  startRepairObserver(isDownloadScanEnabled())
 })
 
 void bootstrap()

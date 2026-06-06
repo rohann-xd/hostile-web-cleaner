@@ -18,6 +18,7 @@ export enum MessageType {
   BLOCK_DOMAIN_SESSION = 'BLOCK_DOMAIN_SESSION',
   UNTRACKED_TAB_PROMPT = 'UNTRACKED_TAB_PROMPT',
   OVERLAY_REMOVED = 'OVERLAY_REMOVED',
+  FAKE_DOWNLOAD_FLAGGED = 'FAKE_DOWNLOAD_FLAGGED',
 }
 
 export interface GetSettingsResponse {
@@ -51,6 +52,11 @@ export interface UntrackedTabPromptPayload {
 }
 
 export interface OverlayRemovedPayload {
+  count: number
+  url: string
+}
+
+export interface FakeDownloadFlaggedPayload {
   count: number
   url: string
 }
@@ -94,6 +100,7 @@ export type ExtensionMessage =
   | { type: MessageType.BLOCK_DOMAIN_SESSION; payload: BlockDomainSessionPayload }
   | { type: MessageType.UNTRACKED_TAB_PROMPT; payload: UntrackedTabPromptPayload }
   | { type: MessageType.OVERLAY_REMOVED; payload: OverlayRemovedPayload }
+  | { type: MessageType.FAKE_DOWNLOAD_FLAGGED; payload: FakeDownloadFlaggedPayload }
 
 export type ExtensionResponse =
   | GetSettingsResponse

@@ -1,7 +1,11 @@
 import { debugLog } from '@/core/logging'
 
+let initialized = false
+
 /** Logs suspicious clicks that may open tabs outside link/window.open paths. */
 export function initDebugClickAudit(): void {
+  if (initialized) return
+  initialized = true
   document.addEventListener(
     'click',
     (event) => {

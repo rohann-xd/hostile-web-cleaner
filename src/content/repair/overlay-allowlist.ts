@@ -85,5 +85,9 @@ export function isAllowlisted(element: Element): boolean {
   if (matchesSelector(element, CONSENT_SELECTORS)) return true
   if (isLegitimateDialog(element)) return true
   if (isSmallBottomBanner(element)) return true
+
+  const dialogAncestor = element.closest('[role="dialog"]')
+  if (dialogAncestor && isLegitimateDialog(dialogAncestor)) return true
+
   return false
 }

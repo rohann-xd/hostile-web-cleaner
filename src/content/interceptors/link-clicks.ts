@@ -98,7 +98,11 @@ function onAuxClick(event: MouseEvent): void {
   void handleLinkNavigation(anchor, event)
 }
 
+let initialized = false
+
 export function initLinkClickInterceptor(): void {
+  if (initialized) return
+  initialized = true
   document.addEventListener('click', onClick, true)
   document.addEventListener('auxclick', onAuxClick, true)
 }

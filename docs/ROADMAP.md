@@ -56,17 +56,22 @@ Detailed task breakdowns, file lists, and verification steps live in the local `
 
 ---
 
-## Phase 2.5 — Fake Download Button Detection
+## Phase 2.5 — Fake Download Button Detection (complete)
 
 **Goal:** Safer downloading on hostile file-host and software sites.
 
 **Problem:** Ads disguised as download buttons redirect to malware or affiliate pages (PRODUCT Goal 4).
 
-**Modules:**
-- `src/content/repair/download-button-analyzer.ts` — score suspicious download CTAs
-- `src/content/repair/download-button-highlighter.ts` — flag trusted vs fake buttons
+**Delivered:**
+- Heuristic download CTA analysis (`download-button-analyzer.ts`) — trust vs fake scoring
+- Visual badges + click suppression for fake buttons (`download-button-highlighter.ts`)
+- Integrated into repair pipeline (top frame only) with DOM observer re-scan
+- Session fake-download counter via messaging
+- Global `flagFakeDownloads` rule (until Phase 5)
 
-**Expected result:** Only legitimate download actions remain clickable.
+**Key modules:** `download-button-analyzer.ts`, `download-button-highlighter.ts`, `repair/index.ts`
+
+**Dev tests:** `npm run dev` → http://localhost:5173/dev/phase2b-downloads.html
 
 ---
 
@@ -140,7 +145,7 @@ Detailed task breakdowns, file lists, and verification steps live in the local `
 ## Execution order
 
 ```
-Phase 0 ✓ → Phase 1 ✓ → Phase 2 ✓ → Phase 2.5 → Phase 3 → Phase 4 → Phase 5 → Phase 6
+Phase 0 ✓ → Phase 1 ✓ → Phase 2 ✓ → Phase 2.5 ✓ → Phase 3 → Phase 4 → Phase 5 → Phase 6
 ```
 
 ## Future Possibilities

@@ -1,6 +1,7 @@
 export type RuleAction =
   | 'blockPopup'
   | 'removeOverlay'
+  | 'flagFakeDownloads'
   | 'skipCountdown'
   | 'restoreScroll'
 
